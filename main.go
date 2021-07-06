@@ -1,30 +1,93 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"os"
 
 	"github.com/gocolly/colly"
 )
 
-// main() contains code adapted from example found in Colly's docs:
-// http://go-colly.org/docs/examples/basic/
+var (
+	c = colly.NewCollector()
+)
+
 func main() {
-	// Instantiate default collector
-	c := colly.NewCollector()
+	args := os.Args
 
-	// On every a element which has href attribute call callback
-	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
-		link := e.Attr("href")
+	if len(args) == 1 {
+		displayHelp()
+		return
+	}
 
-		// Print link
-		fmt.Printf("Link found: %q -> %s\n", e.Text, link)
+	switch args[1] {
+	case "area":
+		getAreas()
+	case "search":
+		searchCraigslist()
+	}
+
+}
+
+func displayHelp() {
+	fmt.Println("A all-purpose search engine for Craigslist free items")
+	fmt.Println("")
+	fmt.Println("Commands:")
+	fmt.Println("  area       Get a list of all Craigslist areas")
+	fmt.Println("  search     Search a Craigslist area for free items")
+	fmt.Println("")
+	fmt.Println("Run 'cl COMMAND --help' for more information on a command.")
+}
+
+func getAreas() {
+
+	c.OnHTML("h4+ul>li>a", func(e *colly.HTMLElement) {
+		fmt.Println(e.Text)
 	})
 
-	// Before making a request print "Visiting ..."
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL.String())
+	link := "https://www.craigslist.org/about/sites"
+
+	c.Visit(link)
+}
+
+func searchCraigslist() {
+	var area string
+	var query string
+
+	flag.StringVar(&area, "a", "", "craigslist area to search")
+	flag.StringVar(&area, "area", "", "craigslist area to search")
+	flag.StringVar(&query, "q", "", "query to search")
+	flag.StringVar(&query, "query", "", "query to search")
+
+	flag.Parse()
+
+	getItems(area, query)
+}
+
+func getItems(area, query string) {
+	c.OnHTML("h3.result-heading", func(e *colly.HTMLElement) {
+		fmt.Println(e.Text)
+		resultLink := e.ChildAttr("a", "href")
+		getItemDescription(resultLink)
 	})
 
-	// Start scraping on https://hackerspaces.org
-	c.Visit("https://hackerspaces.org/")
+	c.OnError(func(_ *colly.Response, err error) {
+		fmt.Println("Something went wrong:", err)
+	})
+
+	link := fmt.Sprintf("https://%s.craigslist.org/d/free-stuff/search/zip?query=%s", area, query)
+
+	c.Visit(link)
+}
+
+func getItemDescription(link string) {
+
+	fmt.Println(link)
+
+	// c.OnHTML("#postingbody", func(e *colly.HTMLElement) {
+	// 	fmt.Println(e.Text)
+	// 	return
+	// })
+
+	// c.Visit(link)
 }
