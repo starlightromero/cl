@@ -26,6 +26,7 @@
 ## Table of Contents
 
 - [How to Run](#how-to-run)
+- [Commands](#commands)
 
 
 ## How to Run
@@ -48,4 +49,21 @@ go mod download
 Run the application!
 ```zsh
 go run .
+```
+
+
+## Commands
+
+To list available commands, either run `cl` with no parameters or execute `cl help`:
+
+```zsh
+A all-purpose search engine for Craigslist free items
+
+Commands:
+  areas        Get a list of all Craigslist areas
+  search       Search a Craigslist area for free items
+  subregions   Get a list of all Craigslist subregions
+  regions      Get a list of all Craigslist regions
+
+Run 'cl COMMAND --help' for more information on a command.
 ```
