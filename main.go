@@ -65,14 +65,28 @@ func main() {
 		regions.Get(help, c)
 	case "search":
 		searchCmd.Parse(os.Args[2:])
-		search.Execute(area, query, today, help, c)
+		areas := search.ParseAreas(os.Args[2:])
+		// results := make(map[string]string)
+		// searchChannel := make(chan string)
+		for _, a := range areas {
+			// push function call into channel
+			// go func(a string) {
+			// 	searchChannel <- search.Execute(a, query, today, help, c)
+			// }(a)
+			// results :=
+			search.Execute(a, query, today, help, c)
+			// fmt.Println(results)
+
+		}
+		// for i := 0; i < len(areas); i++ {
+		// 	searchResult := <-searchChannel
+		// }
 	case "help":
 		helpCmd.Parse(os.Args[2:])
 		printHelp()
 	default:
 		printHelp()
 	}
-
 }
 
 func printHelp() {
